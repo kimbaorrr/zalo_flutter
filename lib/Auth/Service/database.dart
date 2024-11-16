@@ -19,9 +19,9 @@ class DatabaseMethods {
     return await usersRef.where("email", isEqualTo: user).get();
   }
 
-  void uploadUserInfo(Map<String, String> userMap) {
-    usersRef.add(userMap).catchError((e) {
-      print("Error uploading user info: $e");
+  uploadUserInfo(userMap) {
+    FirebaseFirestore.instance.collection("Users").add(userMap).catchError((e) {
+      print(e.toString());
     });
   }
 

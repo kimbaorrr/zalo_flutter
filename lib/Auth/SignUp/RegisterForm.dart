@@ -244,12 +244,17 @@ class _RegisterFormState extends State<RegisterForm> {
   Future<void> signUp() async {
     if (_formKey.currentState!.validate()) {
       postDetailsToFireStore();
+      showAlertDialog(context, true, "Đăng kí tài khoản thành công !");
+      Navigator.pushAndRemoveUntil(
+          (context),
+          MaterialPageRoute(builder: (context) => const SignInPage()),
+          (route) => false);
     } else {
       showAlertDialog(context, false, "Đăng kí thất bại. Thử lại !");
     }
   }
 
-  void postDetailsToFireStore() async {
+  postDetailsToFireStore() async {
     _authService
         .createUserWithEmailAndPassword(
             "${widget.number}@gmail.com", password.text)
@@ -260,14 +265,9 @@ class _RegisterFormState extends State<RegisterForm> {
         "gender": gender,
         "birthDay": dateController.text,
         "avatar":
-            "https://cdn.kona-blue.com/upload/kona-blue_com/post/images/2024/09/18/457/avatar-mac-dinh-11.jpg"
+            "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg"
       };
       _databaseMethods.uploadUserInfo(userInfoMap);
-      showAlertDialog(context, true, "Đăng kí tài khoản thành công !");
-      Navigator.pushAndRemoveUntil(
-          (context),
-          MaterialPageRoute(builder: (context) => const SignInPage()),
-          (route) => false);
     });
   }
 }
