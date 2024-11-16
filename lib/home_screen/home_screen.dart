@@ -63,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen>
     setState(() {});
   }
 
-  // lấy danh sách tất cả user
   Future<List<Users>> getAllUser() async {
     listUsers.clear();
     return await FirebaseFirestore.instance
@@ -80,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
-  // ignore: must_call_super
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -208,41 +206,6 @@ class _HomeScreenState extends State<HomeScreen>
 class CustomSearchDelegate extends SearchDelegate {
   List<Users> searchItem = listUsers;
 
-  // Tạo phòng chat
-  createChatRoomAndStartConversation(
-    BuildContext context, {
-    required String userEmail,
-    required String userName,
-  }) async {
-    if (userEmail != Constants.myEmail) {
-      String chatRoomId = getChatRoomId(userEmail, Constants.myEmail);
-      List<String> users = [userName, Constants.myName];
-      Map<String, dynamic> chatRoomMap = {
-        "users": users,
-        "chatroomId": chatRoomId
-      };
-      DatabaseMethods().createChatRoom(chatRoomId, chatRoomMap);
-      // ignore: avoid_print
-      print(Constants.myName);
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ConversationScreen(
-                    chatRoomId: chatRoomId,
-                    User: userName,
-                  )));
-    }
-  }
-
-  // tạo id phòng chat
-  getChatRoomId(String a, String b) {
-    if (int.parse(a) > int.parse(b)) {
-      return "$a\_$b";
-    } else {
-      return "$b\_$a";
-    }
-  }
-
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -290,9 +253,14 @@ class CustomSearchDelegate extends SearchDelegate {
         var result = matchQuery[index];
         return InkWell(
           onTap: () {
-            createChatRoomAndStartConversation(context,
+            showDialog(
+              context: context,
+              builder: (context) => UserCard(
+                avatarUrl: Constants.myAvatar,
+                userName: result.name,
                 userEmail: result.email.replaceAll("@gmail.com", ""),
-                userName: result.name);
+              ),
+            );
           },
           child: Row(
             children: [
@@ -374,9 +342,14 @@ class CustomSearchDelegate extends SearchDelegate {
         var result = matchQuery[index];
         return InkWell(
           onTap: () {
-            createChatRoomAndStartConversation(context,
+            showDialog(
+              context: context,
+              builder: (context) => UserCard(
+                avatarUrl: Constants.myAvatar,
+                userName: result.name,
                 userEmail: result.email.replaceAll("@gmail.com", ""),
-                userName: result.name);
+              ),
+            );
           },
           child: Row(
             children: [
@@ -437,6 +410,106 @@ class CustomSearchDelegate extends SearchDelegate {
           ),
         );
       },
+    );
+  }
+}
+
+class UserCard extends StatelessWidget {
+  final String avatarUrl;
+  final String userName;
+  final String userEmail;
+
+  const UserCard(
+      {super.key,
+      required this.avatarUrl,
+      required this.userName,
+      required this.userEmail});
+
+  getChatRoomId(String a, String b) {
+    if (int.parse(a) > int.parse(b)) {
+      return "$a\_$b";
+    } else {
+      return "$b\_$a";
+    }
+  }
+
+  createChatRoomAndStartConversation(
+    BuildContext context, {
+    required String userEmail,
+    required String userName,
+  }) async {
+    if (userEmail != Constants.myEmail) {
+      String chatRoomId = getChatRoomId(userEmail, Constants.myEmail);
+      List<String> users = [userName, Constants.myName];
+      Map<String, dynamic> chatRoomMap = {
+        "users": users,
+        "chatroomId": chatRoomId
+      };
+      DatabaseMethods().createChatRoom(chatRoomId, chatRoomMap);
+
+      print(Constants.myName);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ConversationScreen(
+                    chatRoomId: chatRoomId,
+                    User: userName,
+                  )));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundImage: NetworkImage(avatarUrl),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              userName,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    createChatRoomAndStartConversation(context,
+                        userEmail: userEmail.replaceAll("@gmail.com", ""),
+                        userName: userName);
+                  },
+                  icon: const Icon(Icons.message),
+                  label: const Text('Nhắn tin'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade600,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.person_add),
+                  label: const Text('Kết bạn'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
