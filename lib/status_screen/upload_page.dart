@@ -205,15 +205,15 @@ class _UploadPageState extends State<UploadPage> {
   Widget displayUploadFormScreen() {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey.shade200,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: removeImage,
         ),
         title: const Text(
-          "New Post",
+          "Bài đăng mới",
           style: TextStyle(
-              fontSize: 24.0, color: Colors.black, fontWeight: FontWeight.bold),
+              fontSize: 17, color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: <Widget>[
           TextButton(
@@ -230,6 +230,7 @@ class _UploadPageState extends State<UploadPage> {
         ],
       ),
       body: ListView(
+        padding: const EdgeInsets.all(8.0), // Thêm padding tổng thể
         children: <Widget>[
           if (file != null)
             SizedBox(
@@ -244,25 +245,28 @@ class _UploadPageState extends State<UploadPage> {
                         image: FileImage(file!),
                         fit: BoxFit.cover,
                       ),
+                      borderRadius: BorderRadius.circular(10.0), // Bo góc
                     ),
                   ),
                 ),
               ),
             ),
-          const Padding(padding: EdgeInsets.only(top: 12.0)),
+          if (file != null)
+            const SizedBox(height: 12.0), // Khoảng cách khi có file
           ListTile(
-            leading: CircleAvatar(
-              radius: 20.0,
-              backgroundColor: Colors.grey[200],
-              backgroundImage: NetworkImage(Constants.myAvatar),
-            ),
             title: TextFormField(
               style: const TextStyle(color: Colors.black),
               controller: descriptionTextEditingController,
-              decoration: const InputDecoration(
+              maxLines: 7,
+              decoration: InputDecoration(
                 hintText: "Cảm xúc của bạn hôm nay như thế nào?",
-                hintStyle: TextStyle(color: Colors.grey),
-                border: InputBorder.none,
+                hintStyle: const TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0), // Bo góc
+                  borderSide: BorderSide.none, // Không có viền
+                ),
+                filled: true,
+                fillColor: Colors.grey[300], // Màu nền xám nhạt
               ),
             ),
           ),

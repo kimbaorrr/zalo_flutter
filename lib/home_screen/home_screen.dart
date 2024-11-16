@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '/Auth/StartPage.dart';
 import '/Auth/Service/constant.dart';
 import '/Auth/Service/database.dart';
 import '/Auth/Service/helper_function.dart';
-import '../Auth/Profile/profile_screen.dart';
-import '../Auth/Profile/setting_screen.dart';
+import '/Auth/Profile/profile_screen.dart';
+import '/Auth/Profile/setting_screen.dart';
 import '/Auth/modals/user.dart';
 import '/contact_screen/contact_screen.dart';
 import '/messenge_screen/conversation_screen.dart';
 import '/messenge_screen/messenge_screen.dart';
 import '/status_screen/status_screen.dart';
 import '/widgets/custom_text_field.dart';
-import 'dart:math' as math;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,6 +53,13 @@ class _HomeScreenState extends State<HomeScreen>
         await HelperFunctions.getUserEmailSharedPreference() ?? "";
     Constants.myAvatar =
         await HelperFunctions.getUserAvatarSharedPreference() ?? "";
+    if (Constants.myName.isEmpty || Constants.myEmail.isEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StartPage()),
+      );
+      return;
+    }
     setState(() {});
   }
 
@@ -301,15 +308,6 @@ class CustomSearchDelegate extends SearchDelegate {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      child: Center(
-                        child: Text(
-                          result.name.split(' ').last,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.white),
-                        ),
-                      ),
                     ),
                   )),
               const SizedBox(
@@ -394,55 +392,47 @@ class CustomSearchDelegate extends SearchDelegate {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      child: Center(
-                        child: Text(
-                          result.name.split(' ').last,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.white),
-                        ),
-                      ),
                     ),
                   )),
               const SizedBox(
                 width: 5,
               ),
               Flexible(
-                  flex: 7,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        result.name,
-                        style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 18),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.phone,
-                            size: 15,
-                          ),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            result.email.replaceAll("@gmail.com", ''),
-                            style: const TextStyle(
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ],
-                  )),
+                flex: 7,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      result.name,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 18),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.phone,
+                          size: 15,
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          result.email.replaceAll("@gmail.com", ''),
+                          style: const TextStyle(
+                              color: Colors.blueAccent,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         );
