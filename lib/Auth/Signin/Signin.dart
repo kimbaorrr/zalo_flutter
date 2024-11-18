@@ -294,7 +294,7 @@ class _SignInPageState extends State<SignInPage> {
     });
   }
 
-  Future<void> _loginUser() async {
+  Future<dynamic> _loginUser() async {
     showDialog(
       context: context,
       builder: (context) => const DialogLoading(),

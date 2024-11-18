@@ -2,11 +2,9 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import '/Auth/Service/constant.dart';
 import '/Auth/Service/database.dart';
 import 'package:uuid/uuid.dart';
-import 'package:image/image.dart' as ImD;
 
 class UploadPage extends StatefulWidget {
   @override
@@ -21,62 +19,61 @@ class _UploadPageState extends State<UploadPage> {
   TextEditingController descriptionTextEditingController =
       TextEditingController();
 
-  // Method to pick an image from the gallery
   Future<void> pickImageFromGallery() async {
     Navigator.pop(context);
     final XFile? imagefile = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxHeight: 680,
-      maxWidth: 970,
-    );
+        source: ImageSource.gallery,
+        maxHeight: 680,
+        maxWidth: 970,
+        imageQuality: 75);
+
     setState(() {
       file = imagefile != null ? File(imagefile.path) : null;
+      print("File path: ${file?.path}");
+      print("File exists: ${file?.existsSync()}");
     });
   }
 
-  // Method to capture an image with the camera
   Future<void> captureImageWithCamera() async {
     Navigator.pop(context);
     final XFile? imagefile = await _picker.pickImage(
-      source: ImageSource.camera,
-      maxHeight: 680,
-      maxWidth: 970,
-    );
+        source: ImageSource.camera,
+        maxHeight: 680,
+        maxWidth: 970,
+        imageQuality: 75);
     setState(() {
       file = imagefile != null ? File(imagefile.path) : null;
     });
   }
 
-  // Close dialog
   void close() {
     Navigator.pop(context);
   }
 
-  // Show dialog to pick or capture an image
   void takeImage(BuildContext mContext) {
     showDialog(
       context: mContext,
       builder: (context) {
         return SimpleDialog(
           title: const Text(
-            "New Post",
+            "Bài đăng mới",
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           children: <Widget>[
             SimpleDialogOption(
               onPressed: captureImageWithCamera,
-              child: const Text("Capture Image with Camera",
-                  style: TextStyle(color: Colors.black)),
+              child:
+                  const Text("Chụp ảnh", style: TextStyle(color: Colors.black)),
             ),
             SimpleDialogOption(
               onPressed: pickImageFromGallery,
-              child: const Text("Select Image from Gallery",
+              child: const Text("Chọn ảnh từ thư viện",
                   style: TextStyle(color: Colors.black)),
             ),
             SimpleDialogOption(
               onPressed: close,
               child:
-                  const Text("Cancel", style: TextStyle(color: Colors.black)),
+                  const Text("Hủy bỏ", style: TextStyle(color: Colors.black)),
             ),
           ],
         );
@@ -84,7 +81,6 @@ class _UploadPageState extends State<UploadPage> {
     );
   }
 
-  // Display the screen when no image is selected
   Widget displayUploadScreen() {
     return Container(
       color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
@@ -113,55 +109,31 @@ class _UploadPageState extends State<UploadPage> {
     );
   }
 
-  // Remove the selected image
   void removeImage() {
     setState(() {
       file = null;
     });
   }
 
-  // Compress the selected photo before uploading
-  Future<void> compressingPhoto() async {
-    final tDirectory = await getTemporaryDirectory();
-    final path = tDirectory.path;
-    ImD.Image mImageFile = ImD.decodeImage(file!.readAsBytesSync())!;
-    final compressedImageFile = File('$path/img_$postId.jpg')
-      ..writeAsBytesSync(ImD.encodeJpg(mImageFile, quality: 85));
-    setState(() {
-      file = compressedImageFile;
-    });
-  }
-
-  // Upload image to Firebase Storage
   Future<String> uploadImage(File imageFile, String postId) async {
     try {
-      // Tạo tham chiếu tới Firebase Storage
       final storageRef =
           FirebaseStorage.instance.ref().child("post_$postId.jpg");
 
-      // Tải lên ảnh với UploadTask
       UploadTask uploadTask = storageRef.putFile(imageFile);
 
-      // Lắng nghe khi hoàn thành tải lên
       TaskSnapshot storageSnap = await uploadTask.whenComplete(() => null);
 
-      // Kiểm tra nếu có lỗi trong quá trình tải lên
       if (storageSnap.state == TaskState.success) {
-        // Lấy URL tải xuống sau khi tải lên thành công
         String downloadUrl = await storageSnap.ref.getDownloadURL();
         return downloadUrl;
-      } else {
-        print("Upload failed: ${storageSnap.toString()}");
-        return ''; // Trả về chuỗi rỗng nếu tải lên thất bại
       }
     } catch (e) {
-      // Xử lý lỗi nếu có
-      print("Error uploading image: $e");
-      return ''; // Trả về chuỗi rỗng nếu có lỗi
+      throw Exception("Upload failed: ${e.toString()}");
     }
+    return "";
   }
 
-  // Create a new post in Firestore
   Future<void> createPostInFireStore({
     required String mediaUrl,
     required String description,
@@ -182,12 +154,18 @@ class _UploadPageState extends State<UploadPage> {
     });
   }
 
-  // Control the upload and save process
   Future<void> controlUploadAndSave() async {
+    if (file == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Vui lòng chọn ảnh trước khi đăng")),
+      );
+      return;
+    }
+
     setState(() {
       uploading = true;
     });
-    await compressingPhoto();
+
     String mediaUrl = await uploadImage(file!, postId);
     await createPostInFireStore(
       mediaUrl: mediaUrl,
@@ -201,7 +179,6 @@ class _UploadPageState extends State<UploadPage> {
     });
   }
 
-  // Display the form for uploading
   Widget displayUploadFormScreen() {
     return Scaffold(
       appBar: AppBar(
@@ -216,21 +193,26 @@ class _UploadPageState extends State<UploadPage> {
               fontSize: 17, color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: <Widget>[
-          TextButton(
-            onPressed: uploading ? null : controlUploadAndSave,
-            child: Text(
-              "Đăng",
-              style: TextStyle(
-                color: uploading ? Colors.grey : Colors.lightBlue,
-                fontWeight: FontWeight.bold,
-                fontSize: 16.0,
-              ),
-            ),
-          ),
+          uploading
+              ? const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(color: Colors.blue),
+                )
+              : TextButton(
+                  onPressed: controlUploadAndSave,
+                  child: Text(
+                    "Đăng",
+                    style: TextStyle(
+                      color: uploading ? Colors.grey : Colors.lightBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                ),
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(8.0), // Thêm padding tổng thể
+        padding: const EdgeInsets.all(8.0),
         children: <Widget>[
           if (file != null)
             SizedBox(
@@ -245,14 +227,13 @@ class _UploadPageState extends State<UploadPage> {
                         image: FileImage(file!),
                         fit: BoxFit.cover,
                       ),
-                      borderRadius: BorderRadius.circular(10.0), // Bo góc
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
                 ),
               ),
             ),
-          if (file != null)
-            const SizedBox(height: 12.0), // Khoảng cách khi có file
+          if (file != null) const SizedBox(height: 12.0),
           ListTile(
             title: TextFormField(
               style: const TextStyle(color: Colors.black),
@@ -262,11 +243,11 @@ class _UploadPageState extends State<UploadPage> {
                 hintText: "Cảm xúc của bạn hôm nay như thế nào?",
                 hintStyle: const TextStyle(color: Colors.grey),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0), // Bo góc
-                  borderSide: BorderSide.none, // Không có viền
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.grey[300], // Màu nền xám nhạt
+                fillColor: Colors.grey[300],
               ),
             ),
           ),

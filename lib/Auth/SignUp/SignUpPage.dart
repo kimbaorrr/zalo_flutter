@@ -8,7 +8,7 @@ import '/Auth/SignUp/OTPScreen.dart';
 import '/widgets/custom_loading.dart';
 
 class SignUpPage extends StatefulWidget {
-  SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({super.key});
 
   @override
   _SignUpPageState createState() => _SignUpPageState();

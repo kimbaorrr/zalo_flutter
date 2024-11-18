@@ -30,7 +30,7 @@ class CustomTextFieldNonBorder extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatter;
 
   const CustomTextFieldNonBorder({
-    Key? key,
+    super.key,
     this.title,
     this.isPassword = false,
     this.keyboardType = TextInputType.multiline,

@@ -11,13 +11,13 @@ class PostContainer extends StatelessWidget {
   final String imageUrl;
 
   const PostContainer({
-    Key? key,
+    super.key,
     required this.caption,
     required this.avatarUrl,
     required this.time,
     required this.imageUrl,
     required this.name,
-  }) : super(key: key);
+  });
 
   factory PostContainer.fromDocument({required DocumentSnapshot doc}) {
     return PostContainer(

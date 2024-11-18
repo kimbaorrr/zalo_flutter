@@ -57,8 +57,11 @@ class _DiaryState extends State<Diary> {
                 future: futurePosts,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: Colors.black),
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: CircularProgressIndicator(color: Colors.blue),
+                      ),
                     );
                   } else if (snapshot.hasError) {
                     return const Center(

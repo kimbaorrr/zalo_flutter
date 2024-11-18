@@ -189,17 +189,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   _onEmojiSelected(emoji);
                 },
                 onBackspacePressed: _onBackspacePressed,
-                config: Config(
+                config: const Config(
                     height: 256,
-                    viewOrderConfig: const ViewOrderConfig(
+                    viewOrderConfig: ViewOrderConfig(
                       top: EmojiPickerItem.categoryBar,
                       middle: EmojiPickerItem.emojiView,
                       bottom: EmojiPickerItem.searchBar,
                     ),
-                    skinToneConfig: const SkinToneConfig(),
-                    categoryViewConfig: const CategoryViewConfig(),
-                    bottomActionBarConfig: const BottomActionBarConfig(),
-                    searchViewConfig: const SearchViewConfig()),
+                    skinToneConfig: SkinToneConfig(),
+                    categoryViewConfig: CategoryViewConfig(),
+                    bottomActionBarConfig: BottomActionBarConfig(),
+                    searchViewConfig: SearchViewConfig()),
               ),
             ),
           ),

@@ -52,9 +52,9 @@ class _ContactScreenState extends State<ContactScreen> {
   // tạo id phòng chat
   getChatRoomId(String a, String b) {
     if (int.parse(a) > int.parse(b)) {
-      return "$a\_$b";
+      return "${a}_$b";
     } else {
-      return "$b\_$a";
+      return "${b}_$a";
     }
   }
 
@@ -105,8 +105,12 @@ class _ContactScreenState extends State<ContactScreen> {
                 stream: DatabaseMethods().getAllUsers(),
                 builder: (context, userSnapshot) {
                   return userSnapshot.connectionState == ConnectionState.waiting
-                      ? const Center(
-                          child: CircularProgressIndicator(),
+                      ? const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child:
+                                CircularProgressIndicator(color: Colors.blue),
+                          ),
                         )
                       : ListView.builder(
                           primary: false,

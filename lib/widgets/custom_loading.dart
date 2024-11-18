@@ -5,9 +5,9 @@ class DialogLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
+    return const Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(20),
+      insetPadding: EdgeInsets.all(20),
       child: Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
