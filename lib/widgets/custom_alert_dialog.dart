@@ -14,7 +14,7 @@ Future<void> showAlertDialog(
           children: [
             !success
                 ? const Icon(Icons.error_outline, color: Colors.red, size: 28)
-                : const Icon(Icons.bus_alert_outlined,
+                : const Icon(Icons.add_alert_sharp,
                     color: Colors.grey, size: 28),
             const SizedBox(width: 10),
             Text(
@@ -32,7 +32,7 @@ Future<void> showAlertDialog(
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
-              backgroundColor: success ? Colors.green : Colors.red,
+              backgroundColor: success ? Colors.blue : Colors.red,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

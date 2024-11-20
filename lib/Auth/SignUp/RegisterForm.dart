@@ -259,13 +259,14 @@ class _RegisterFormState extends State<RegisterForm> {
         .createUserWithEmailAndPassword(
             "${widget.number}@gmail.com", password.text)
         .then((val) {
-      Map<String, String> userInfoMap = {
+      Map<String, dynamic> userInfoMap = {
         "name": name.text,
         "email": "${widget.number}@gmail.com",
         "gender": gender,
         "birthDay": dateController.text,
         "avatar":
-            "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg"
+            "https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg",
+        "friends": []
       };
       _databaseMethods.uploadUserInfo(userInfoMap);
     });

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:zalo/widgets/custom_alert_dialog.dart';
 import '/Auth/StartPage.dart';
 import '/Auth/Service/constant.dart';
 import '/Auth/Service/database.dart';
@@ -65,21 +66,19 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<List<Users>> getAllUser() async {
     listUsers.clear();
-    return await FirebaseFirestore.instance
-        .collection("Users")
-        .get()
-        .then((users) {
+    return await usersRef.get().then((users) {
       for (final DocumentSnapshot<Map<String, dynamic>> doc in users.docs) {
         listUsers.add(Users.fromDocumentSnapshot(doc: doc));
         listUsers.removeWhere((element) =>
             element.email.replaceAll("@gmail.com", '') == Constants.myEmail);
       }
-      return listUsers;
+      return listUsers.isEmpty ? List.empty() : listUsers;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -259,6 +258,7 @@ class CustomSearchDelegate extends SearchDelegate {
                 avatarUrl: Constants.myAvatar,
                 userName: result.name,
                 userEmail: result.email.replaceAll("@gmail.com", ""),
+                isFriend: result.friends.contains(result.name),
               ),
             );
           },
@@ -345,10 +345,10 @@ class CustomSearchDelegate extends SearchDelegate {
             showDialog(
               context: context,
               builder: (context) => UserCard(
-                avatarUrl: Constants.myAvatar,
-                userName: result.name,
-                userEmail: result.email.replaceAll("@gmail.com", ""),
-              ),
+                  avatarUrl: Constants.myAvatar,
+                  userName: result.name,
+                  userEmail: result.email.replaceAll("@gmail.com", ""),
+                  isFriend: result.friends.contains(result.name)),
             );
           },
           child: Row(
@@ -414,16 +414,39 @@ class CustomSearchDelegate extends SearchDelegate {
   }
 }
 
-class UserCard extends StatelessWidget {
+class UserCard extends StatefulWidget {
   final String avatarUrl;
   final String userName;
   final String userEmail;
+  late bool isFriend;
 
-  const UserCard(
+  UserCard(
       {super.key,
       required this.avatarUrl,
       required this.userName,
-      required this.userEmail});
+      required this.userEmail,
+      required this.isFriend});
+
+  @override
+  _UserCardState createState() => _UserCardState();
+}
+
+class _UserCardState extends State<UserCard> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> addOrRemoveFriend() async {
+    bool result = await DatabaseMethods()
+        .addOrRemoveFriend(!widget.isFriend, Constants.myName, widget.userName);
+
+    if (result) {
+      setState(() {
+        widget.isFriend = !widget.isFriend;
+      });
+    }
+  }
 
   getChatRoomId(String a, String b) {
     if (int.parse(a) > int.parse(b)) {
@@ -472,11 +495,11 @@ class UserCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundImage: NetworkImage(avatarUrl),
+              backgroundImage: NetworkImage(widget.avatarUrl),
             ),
             const SizedBox(height: 10),
             Text(
-              userName,
+              widget.userName,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
@@ -486,8 +509,9 @@ class UserCard extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     createChatRoomAndStartConversation(context,
-                        userEmail: userEmail.replaceAll("@gmail.com", ""),
-                        userName: userName);
+                        userEmail:
+                            widget.userEmail.replaceAll("@gmail.com", ""),
+                        userName: widget.userName);
                   },
                   icon: const Icon(Icons.message),
                   label: const Text('Nhắn tin'),
@@ -497,9 +521,10 @@ class UserCard extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('Kết bạn'),
+                  onPressed: addOrRemoveFriend,
+                  icon: Icon(
+                      widget.isFriend ? Icons.person_remove : Icons.person_add),
+                  label: Text(widget.isFriend ? 'Hủy kết bạn' : 'Kết bạn'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
