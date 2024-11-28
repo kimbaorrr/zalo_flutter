@@ -3,12 +3,13 @@ name: Flutter Build
 on:
   push:
     branches:
-      - main
+      - main # Trigger on pushes to the main branch
   pull_request:
     branches:
-      - main
+      - main # Trigger on pull requests to the main branch
 
 jobs:
+  # Job 1: Build the Flutter app
   build:
     name: Build Flutter App
     runs-on: ubuntu-2004
@@ -22,20 +23,48 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "stable"
+          flutter-version: "3.22.1"
 
       # Install dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # Run tests (optional)
-      - name: Run tests
-        run: flutter test
-
       # Build APK (for Android)
       - name: Build APK
         run: flutter build apk --release
 
+  # Job 2: Run tests (Optional)
+  test:
+    name: Run Tests
+    runs-on: ubuntu-2004
+    needs: build # This job depends on the build job completing successfully
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.22.1"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Run tests
+      - name: Run tests
+        run: flutter test
+
+  # Job 3: Upload APK (Optional)
+  upload_apk:
+    name: Upload APK Artifact
+    runs-on: ubuntu-2004
+    needs: build # This job depends on the build job completing successfully
+
+    steps:
       # Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v3
